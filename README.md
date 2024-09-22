@@ -34,140 +34,157 @@ Add the following github IDs so that we can access these:
 **Submit a link to your repo and your video on bCourses.** Do not modify your repo after the submission deadline.
 
 ## Setting Up Your Project:
-Note the assets used in this assignmente was tested on Unity 2020.3.17f1. It may work in other versions too.
+Note the assets used in this assignmente was tested on Unity 2022.3.41f1 and ARFoundation 5.1.5. It may work in other versions too.
 
-Download the SimEnvironments.unitypackage from Google Drive : https://drive.google.com/file/d/13Xf_rKldxM0mgLmgZgbKe2Dg_VzIJBgL/view?usp=sharing 
+In Unity Hub create a new 3D Project. First, we will install the required AR packages. For this, go to `Window→Package Manager→Packages: Unity Registry` and install the `AR Foundation` plugin (this will require a restart).
 
-In Unity Hub create a new 3D Project. Import the ARFoundationSim.unitypackage and SimEnvironments.unitypackage using Assets->Import 
+We must also enable XR simulation. To do this, go to `Edit→Project Settings→Project→XR Plug-in Management` and set `XR Simulation` to `✅`.
+
+Download the `SimEnvironments.unitypackage` from Google Drive : https://drive.google.com/file/d/1YTqAhUooaSUgOJpK8lk5lh8S4NQTdyKy/view?usp=sharing
+
+Import the `SimEnvironments.unitypackage` using Assets->Import 
 ![i1.JPG](/Instructions/i1.JPG)
 
-First delete the main camera that is placed in the scene by default by unity. We will replace this by it’s AR Equivalent. Search for the "AR Camera" Prefab and drag it into the scene hierarchy.
+First delete the main camera that is placed in the scene by default by Unity. We will replace this by it’s AR Equivalent. For this we will need two additional game objects. Right click on the scene hierarchy and add `XR->AR Session` (manages the life cycle of the AR session) and `XR->XR origin` (like the 'camera').
 
 
-Next, we we load a sample simulation scene. Search for "Miniworld_FloorPlan229_physics" prefab and load this into the scene. This is the virtual environment in which you will spawn your AR game. This contains the scene, as well as any associated AR planes in it.
-![i3.JPG](/Instructions/i3.JPG)
+Next, we will create a XR simulation and load a sample simulation scene. Go to `Window→XR→AR Foundation→XR Environment` (you may merge this tab with the others on the original window by dragging it). Search for the "LivingRoomEnv" prefab in the XR Environment dropdown and load this into the scene. This is the virtual environment in which you will spawn your AR game. This contains the scene, as well as any associated AR planes in it.
+![i3.png](/Instructions/i3.png)
 
+Once you click the `►` button, you can interact with the simulation. Hold down right click to pan the camera and use WASDEQ (while right clicking) to move.
 
-We see that, the AR camera is seeing the wrong parts of the scene. Set the transform values through the inspector, that will make sure AR camers gets a good view of the scene. For instance, here's a set of values you may use:
-![i2.JPG](/Instructions/i2.JPG)
+If you would like to modify the AR camera parameters (such as the initial position, which is the tiny light blue camera in the image above), you may do so by editing the `LivingRoomEnv` XR environment, specifically its `Simulation Environment` component. Here are some example values -
 
+![i2.png](/Instructions/i2.png)
 
-Now to help interface with all the AR Planes and their associated interations, we will add our ARPlaneManager, and ARRaycastManager into the scene. To do this, create a new game Object in the scene hierarchy and call it "Managers". In the inspection tab select Add Component and in the search box type “AR Plane Manager” and add it. You will notice that the plane prefab field is empty. We will fill this field by creating our own plane prefab. 
+Now we will add the ability to detect planes. Go to the `XR Origin` object in the scene and in the inspection tab, select `Add Component` and in the search box type “AR Plane Manager” and add it. You will notice that the plane prefab field is empty. We will fill this field by creating our own plane prefab. To do this, add a new `XR->AR Default Plane` to the scene hierarchy and drag it into project window (at the bottom middle), thus creating a prefab. You may delete the `AR Default Plane` object from your scene hierarchy once you have a prefab. Drag the prefab into the empty plane prefab field, as shown below.
 
-![i4.JPG](/Instructions/i4.JPG)
+![i4.png](/Instructions/i4.png)
 
-Now, save the scene. Click Play. In the scene hierarchy, select "Managers" and Change the Value of "Detection Mode". You should observe that different types of planes are detected in the AR scene.
+Now, save the scene. Click Play. You should see planes appearing on flat surfaces of the AR scene! You may also try changing the value of `Detection Mode` of the `AR Plane Manager`.
 
-
-
-
+![i5.png](/Instructions/i5.png)
 
 ## Placing Your Game Board:
 
-Go to GameObject -> 3D Object -> Cube and name your new cube, “Game Board”. Lets change this into more of a game board shape. Select the Game Board and in the inspector set the scale x,y and z values to 0.6, 0.02, and 0.6 respectively. Unity is set up such that the values of 1 unit in game coordinates corresponds to 1 meter in physical coordinates. Since the cube model is a 1 unit cube, these scale parameters correspond to a game board that is 60cm width and height with a 2cm thickness. 
+Go to `GameObject->3D Object->Cube` and name your new cube, “Game Board”. Lets change this into more of a game board shape. Select the Game Board and in the inspector set the scale x,y and z values to 0.6, 0.02, and 0.6 respectively. Unity is set up such that the values of 1 unit in game coordinates corresponds to 1 meter in physical coordinates. Since the cube model is a 1 unit cube, these scale parameters correspond to a game board that is 60cm width and height with a 2cm thickness. 
 
 For now, we will also deactivate our game board so that will not be present at the start of our game. To do this, deselect the checkbox at the very top of the inspector tab for your game board (right above the word “tag”).
 
 ![image14.png](/Instructions/image14.png)
 
-Now we need to set up the code that allows the user to choose a position for the game board. Since we don’t know what the area will look like in advance, we will let the user choose where they want to place the game board. To the Managers, we will add the component ARRaycastManager. Raycasting is how we convert a 2D position on the screen to a 3D position in world space. The ARRaycastManager lets us raycast to the planar regions detected by the AR Plane Manager we created in the previous step. 
+Now we need to set up the code that allows the user to choose a position for the game board. Since we don’t know what the area will look like in advance, we will let the user choose where they want to place the game board. To the `XR origin` object, we will add the component `AR Raycast Manager` in the same fashion as `AR Plane Manager`, except we will keep the prefab empty here. Raycasting is how we convert a 2D position on the screen to a 3D position in world space. The `AR Raycast Manager` lets us raycast to the planar regions detected by the AR Plane Manager we created in the previous step. 
 
-Next we will add the script to actually place the game board. To your Managers select Add Component -> New Script and name it PlaceGameBoard. Double click on the script (in the box next to the word script, not the component itself) to open it. 
+Next we will add the script to actually place the game board. To the `XR origin` object, select `Add Component->New Script` and name it "PlaceGameBoard". Double click on the script (in the box next to the word script, not the component itself) to open it in an editor. 
 
-Set up your script as shown below. For all code is this document, be sure to read the code and comments to understand what the code is doing. 
+Set up your script as shown below. **For all code is this document, be sure to read the code and comments to understand what the code is doing.**
 ```C++
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-//This allows us to user the AR Foundation simulator functions
-using cs294_137.hw2;
+using UnityEngine.XR.ARFoundation;
+using UnityEngine.XR.ARSubsystems; // Required for TrackableType
+
 public class PlaceGameBoard : MonoBehaviour
 {
-    // Public variables can be set from the unity UI.
-    // We will set this to our Game Board object.
     public GameObject gameBoard;
-    // These will store references to our other components.
+
     private ARRaycastManager raycastManager;
     private ARPlaneManager planeManager;
-    // This will indicate whether the game board is set.
     private bool placed = false;
 
-    // Start is called before the first frame update.
     void Start()
     {
-        // GetComponent allows us to reference other parts of this game object.
         raycastManager = GetComponent<ARRaycastManager>();
         planeManager = GetComponent<ARPlaneManager>();
 
-        //We want to place our board only on hortizontal planes. So we tell the plane manager only to detect those
-        planeManager.detectionMode = PlaneDetectionMode.Horizontal;
+        // Set detection mode to Horizontal
+        planeManager.requestedDetectionMode = PlaneDetectionMode.Horizontal;
     }
 
-    // Update is called once per frame.
     void Update()
     {
         if (!placed)
         {
-            if (Input.GetMouseButtonDown(0))
+            // Use touch input if available, otherwise use mouse input (for XR simulation on laptop)
+            if (IsTouchOrMousePressed(out Vector2 touchPosition))
             {
-                Vector2 touchPosition = Input.mousePosition;
-
-                // Raycast will return a list of all planes intersected by the
-                // ray as well as the intersection point.
+                // Perform the AR Raycast
                 List<ARRaycastHit> hits = new List<ARRaycastHit>();
-                if (raycastManager.Raycast(
-                    touchPosition, ref hits, TrackableType.PlaneWithinPolygon))
+                if (raycastManager.Raycast(touchPosition, hits, TrackableType.PlaneWithinPolygon))
                 {
-                    // The list is sorted by distance so to get the location
-                    // of the closest intersection we simply reference hits[0].
-                    var hitPosition = hits[0].hitPosition;
-                    // Now we will activate our game board and place it at the
-                    // chosen location.
-                    gameBoard.SetActive(true);
-                    gameBoard.transform.position = hitPosition;
-                    placed = true;
-                    // After we have placed the game board we will disable the
-                    // planes in the scene as we no longer need them.
-                    
-                    planeManager.detectionMode = PlaneDetectionMode.None;
+                    Pose hitPose = hits[0].pose;
 
+                    // Place and activate the game board
+                    gameBoard.SetActive(true);
+                    gameBoard.transform.position = hitPose.position;
+                    gameBoard.transform.rotation = hitPose.rotation;
+                    placed = true;
+
+                    // Disable further plane detection
+                    planeManager.requestedDetectionMode = PlaneDetectionMode.None;
+                    DisableAllPlanes();
                 }
             }
         }
-        else
+    }
+
+    // Check if touch or mouse is pressed and return the position
+    private bool IsTouchOrMousePressed(out Vector2 touchPosition)
+    {
+        if (Input.touchCount > 0 && Input.GetTouch(0).phase == TouchPhase.Began)
         {
-            // The plane manager will set all detected planes to active by 
-            // default so we will continue to disable these.
-            //planeManager.SetTrackablesActive(false); //For older versions of AR foundation
-            planeManager.detectionMode = PlaneDetectionMode.None;
+            // Use touch input
+            touchPosition = Input.GetTouch(0).position;
+            return true;
+        }
+        else if (Input.GetMouseButtonDown(0))
+        {
+            // Use mouse input
+            touchPosition = Input.mousePosition;
+            return true;
+        }
+
+        touchPosition = default;
+        return false;
+    }
+
+    private void DisableAllPlanes()
+    {
+        foreach (var plane in planeManager.trackables)
+        {
+            plane.gameObject.SetActive(false);
         }
     }
 
-    // If the user places the game board at an undesirable location we 
-    // would like to allow the user to move the game board to a new location.
     public void AllowMoveGameBoard()
     {
         placed = false;
-        //planeManager.SetTrackablesActive(true);
-        planeManager.detectionMode = PlaneDetectionMode.Horizontal;
+        gameBoard.SetActive(false);
+        planeManager.requestedDetectionMode = PlaneDetectionMode.Horizontal;
+        EnableAllPlanes();
     }
 
-    // Lastly we will later need to allow other components to check whether the
-    // game board has been places so we will add an accessor to this.
+    private void EnableAllPlanes()
+    {
+        foreach (var plane in planeManager.trackables)
+        {
+            plane.gameObject.SetActive(true);
+        }
+    }
+
     public bool Placed()
     {
         return placed;
     }
 }
-
 ```
-When you return to the unity editor you should see your script component now has a field for “Game Board”. Drag your game board object from your scene hierarchy into this field. 
-
+When you return to the unity editor you should see your script component now has a field for `Game Board`. Drag your game board object from your scene hierarchy into this field. 
 
 You will notice we haven’t actually used our function to allow the user to move the game board once it is placed. So let’s implement that. For this we are going to add a button to the screen that calls “AllowMoveGameBoard” when pressed. 
 
-Select GameObject->UI->Canvas to add a Canvas to the scene. The Canvas is where we will place all 2D UI elements that are meant to appear attached to the screen. Now create a button GameObject->UI->Button. It should automatically appear under the canvas in the hierarchy.
+Select `GameObject->UI->Canvas` to add a Canvas to the scene. The Canvas is where we will place all 2D UI elements that are meant to appear attached to the screen. Now create a button `GameObject->UI->Legacy->Button`. It should automatically appear under the canvas in the hierarchy.
 
 ![image5.png](/Instructions/image5.png)
 
@@ -177,12 +194,12 @@ First let’s set the button position and size to be more reasonable than the de
 
 If you build and run now you should see a button present at the bottom of your screen, but clicking it doesn’t actually do anything. 
 
-To change this, in your button inspector, scroll down to the field labeled “On Click”. Press the + selection at the bottom of this field. Where the word “none” appears now, drag your Managers from your scene hierarchy into this location. Lastly change the “No Function” selection to PlaceGameBoard->AllowMoveGameBoard(). If you build and run now, after placing your game board, pressing this button should bring back the place visualization and allow you to move your game board to a new location. 
+To change this, in your button inspector, scroll down to the field labeled `On Click`. Press the + selection at the bottom of this field. Where the word “none” appears now, drag the `XR Origin` from your scene hierarchy into this location. Lastly change the “No Function” selection to `PlaceGameBoard->AllowMoveGameBoard()`. If you build and run now, after placing your game board, pressing this button should bring back the place visualization and allow you to move your game board to a new location. 
 
-![i6.PNG](/Instructions/i6.PNG)
+![i6.png](/Instructions/i6.png)
 Lastly let’s change the button label to something more intuitive than “Button”. Expand your Button object in the scene hierarchy and select the Text object that appears below it. Change the text field under “Text (Script)” in the inspector to “Move Board”. Build and Run to see your changes. 
 
-### Making A Simple Interactable Object:
+## Making A Simple Interactable Object:
 
 Making interactable objects in AR is fairly easy. The short version is, we just have to check if a raycast from a user’s touch intersects with an interactable object, and call a function from that object. 
 
@@ -190,7 +207,7 @@ So let’s make a couple objects to interact with. Create two new cubes in the s
 
 ![image6.png](/Instructions/image6.png)
 
-To make it easy for us to call different functions for each button we will create an abstract class which each button will inherit from. In the project window at the bottom of the screen, Right Click->Create->C# Script and name it OnTouch3D. All you need to place in this script is:
+To make it easy for us to call different functions for each button we will create an abstract class which each button will inherit from. In the project window at the bottom of the screen, `Right Click->Create->C# Script` and name it "OnTouch3D". All you need to place in this script is:
 
 ```C++
 public interface OnTouch3D
@@ -199,7 +216,7 @@ public interface OnTouch3D
 }  
 ```
 
-And then our AR Button 1 will inherit from this script and implement this function. For a simple interaction we will make the object move up by 10cm when pressed. In AR Button 1, Add Component -> New Script and name it “ARButton1”. Open this script and place the following code:
+And then our `AR Button 1` will inherit from this script and implement this function. For a simple interaction we will make the object move up by 10cm when pressed. In `AR Button 1`, `Add Component->New Script` and name it “ARButton1”. Open this script and place the following code:
 
 ```C++
 using System.Collections;
@@ -258,13 +275,12 @@ Next let’s add a tag to our object to make it easy to tell that this object is
 
 ![image4.png](/Instructions/image4.png)
 
-Now we need to create the script to actually perform the raycasting to this object. In Managers, Add Component -> New Script and name it “ARButton Manager”. In this script place the following: 
+Now we need to create the script to actually perform the raycasting to this object. In `XR Origin`, `Add Component->New Script` and name it “ARButtonManager”. In this script place the following: 
 
 ```C++
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using cs294_137.hw2;
 
 public class ARButtonManager : MonoBehaviour
 {
@@ -310,11 +326,11 @@ Build and run your game. When you place your game board, you should now see that
 
 It is worth noting that that the button does not actually have to be visible for you to interact with this. This is useful if you want the user to be able to interact with empty spaces on the game board, or just want the selectable region to be bigger than the object that is displayed. 
 
-Let’s turn AR Button 2 into an invisible button. First, don’t forget to add the “Interactable” tag since we are now going to set up interaction for this button. Then disable the checkbox next to the “Mesh Renderer” component. This stops the button from being rendered, making it essentially invisible. 
+Let’s turn `AR Button 2` into an invisible button. First, don’t forget to add the “Interactable” tag since we are now going to set up interaction for this button. Then disable the checkbox next to the “Mesh Renderer” component. This stops the button from being rendered, making it essentially invisible. 
 
 ![image12.png](/Instructions/image12.png)
 
-Since moving an invisible object doesn’t make much sense, let’s instead have this object display a message on the screen. Add a new script to AR Button 2 and name it “ARButton2”. Open the script and add the following: 
+Since moving an invisible object doesn’t make much sense, let’s instead have this object display a message on the screen. Add a new script to `AR Button 2` and name it “ARButton2”. Open the script and add the following: 
 
 ```C++
 using System.Collections;
@@ -334,11 +350,11 @@ public class ARButton2 : MonoBehaviour, OnTouch3D
 }
 ```
 
-We will then need to create the Text object for this to reference. Add a Text object to the scene GameObject->UI->Text and rename it “Message Text”. We will leave this object centered, but be sure the (X,Y,Z) positions are all set to 0. Change the width and height to 250 and 60 respectively and change the font size to 28.  As with our Game Board we are going to set this to inactive to start. 
+We will then need to create the Text object for this to reference. Add a Text object to the scene `GameObject->UI->Legacy->Text` and rename it “Message Text”. We will leave this object centered, but be sure the (X,Y,Z) positions are all set to 0. Change the width and height to 800 and 200 respectively and change the font size to 100.  As with our Game Board we are going to set this to inactive to start. 
 
 ![image13.png](/Instructions/image13.png)
 
-To make this a proper message, let’s also add a script to make the text go inactive again after a specified time. Add a new script component and name it DisappearingText. Open it and add the following:
+To make this a proper message, let’s also add a script to make the text go inactive again after a specified time. Add a new script component and name it "DisappearingText". Open it and add the following:
 
 ```C++
 using System.Collections;
@@ -373,15 +389,7 @@ public class DisappearingText : MonoBehaviour
 }
 ```
 
-Next let’s add a panel to make the text more visible against the background scene. Right Click on your Message Text object in the scene hierarchy and select UI->Panel. This should automatically place a panel under the Message Text object. 
-
-![image5.png](/Instructions/image5.png)
-
-Select the panel and change the “Source Image” in the inspector to UISprite. 
-
-![image1.png](/Instructions/image1.png)
-
-Finally, select your AR Button 2 again and drag your Message Text object into the Message Text section of your AR Button 2 script. 
+Finally, select your `AR Button 2` again and drag your `Message Text` object into the Message Text section of your `AR Button 2` script. 
 
 ![image2.png](/Instructions/image2.png)
 
