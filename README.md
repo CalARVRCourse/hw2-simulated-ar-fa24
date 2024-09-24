@@ -281,6 +281,7 @@ Now we need to create the script to actually perform the raycasting to this obje
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.XR.ARFoundation;
 
 public class ARButtonManager : MonoBehaviour
 {
@@ -289,34 +290,49 @@ public class ARButtonManager : MonoBehaviour
 
     void Start()
     {
-        // Here we will grab the AR camera 
-        // This camera acts like any other camera in Unity.
-        arCamera = FindObjectOfType<ARCamera>().GetComponent<Camera>();
-        // We will also need the PlaceGameBoard script to know if
-        // the game board exists or not.
+        // Find the AR camera. In ARFoundation, you can access the AR camera via Camera.main or
+        // through an explicit AR camera GameObject.
+        arCamera = Camera.main;
+
+        // Ensure the PlaceGameBoard script is attached to the same GameObject as ARButtonManager
         placeGameBoard = GetComponent<PlaceGameBoard>();
+
+        // Log a warning if the AR camera is not found
+        if (arCamera == null)
+        {
+            Debug.LogWarning("AR Camera not found.");
+        }
     }
 
     void Update()
     {
+        // Check if the game board is placed and the user taps the screen
         if (placeGameBoard.Placed() && Input.GetMouseButtonDown(0))
         {
             Vector2 touchPosition = Input.mousePosition;
-            // Convert the 2d screen point into a ray.
+
+            // Convert the 2D screen point into a ray using the AR camera
             Ray ray = arCamera.ScreenPointToRay(touchPosition);
-            // Check if this hits an object within 100m of the user.
-            //RaycastHit hit;
-            //if (Physics.Raycast(ray, out hit,100))
-            RaycastHit[] hits;
-            hits = Physics.RaycastAll(ray, 100.0F);
+
+            // Perform raycasting to detect hits
+            RaycastHit[] hits = Physics.RaycastAll(ray, 100.0f);
+
             for (int i = 0; i < hits.Length; i++)
             {
-                // Check that the object is interactable.
-                if(hits[i].transform.tag=="Interactable")
-                    // Call the OnTouch function.
-                    // Note the use of OnTouch3D here lets us
-                    // call any class inheriting from OnTouch3D.
-                    hits[i].transform.GetComponent<OnTouch3D>().OnTouch();
+                // Check if the hit object is tagged as "Interactable"
+                if (hits[i].transform.CompareTag("Interactable"))
+                {
+                    // Call the OnTouch function on the hit object
+                    OnTouch3D onTouch = hits[i].transform.GetComponent<OnTouch3D>();
+                    if (onTouch != null)
+                    {
+                        onTouch.OnTouch();
+                    }
+                    else
+                    {
+                        Debug.LogWarning("No OnTouch3D component found on " + hits[i].transform.name);
+                    }
+                }
             }
         }
     }
