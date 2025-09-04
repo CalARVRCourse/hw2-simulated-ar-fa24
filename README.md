@@ -29,7 +29,7 @@ You will make a 2 minute video showing off the features of your game. The video 
 You will also need to push your project folder to your your private repo. 
 Add the following github IDs so that we can access these:
 
-`cac-berkeley` `KaushikKunal`
+`cac-berkeley` `astroprismmepng`
 
 **Submit a link to your repo and your video on bCourses.** Do not modify your repo after the submission deadline.
 
@@ -40,7 +40,7 @@ In Unity Hub create a new 3D Project. First, we will install the required AR pac
 
 We must also enable XR simulation. To do this, go to `Edit→Project Settings→Project→XR Plug-in Management` and set `XR Simulation` to `✅`.
 
-Download the `SimEnvironments.unitypackage` from Google Drive : https://drive.google.com/file/d/1YTqAhUooaSUgOJpK8lk5lh8S4NQTdyKy/view?usp=sharing
+Download the `SimEnvironments.unitypackage` from Google Drive : https://drive.google.com/file/d/1A7HJaanwH79um9p1fXVugHG-llYjn4it/view?usp=sharing
 
 Import the `SimEnvironments.unitypackage` using Assets->Import 
 ![i1.JPG](/Instructions/i1.JPG)
