@@ -1,4 +1,4 @@
-# HW2: Building Unity Game in Simulated AR
+# HW1: Building Unity Game in Simulated AR
 
 In this homework you will be building a simple AR Game. The exact game you make is up to you and can be very simple (think Board games such as Tic-Tac-Toe). This document will help you set up an unity game in a simulate environment. It will guide you through the steps of: finding planes in a scene, selecting your game board location, and creating basic interaction elements. 
 
